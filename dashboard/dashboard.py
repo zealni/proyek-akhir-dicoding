@@ -22,9 +22,11 @@ day_df["dteday"] = pd.to_datetime(day_df["dteday"])
 
 # Sidebar
 st.sidebar.image("dashboard/img.png", use_container_width=True)
-st.sidebar.title("Proyek Akhir Belajar Analisis Data dengan Python: Analisis Bike Sharing")
+st.sidebar.title(
+    "Proyek Akhir Belajar Analisis Data dengan Python: Analisis Bike Sharing")
 st.sidebar.write("**Nama:** Arief Setiawan")
-st.sidebar.write("**Email:** [mc189d5y1641@student.devacademy.id](mailto:mc189d5y1641@student.devacademy.id)")
+st.sidebar.write(
+    "**Email:** [mc189d5y1641@student.devacademy.id](mailto:mc189d5y1641@student.devacademy.id)")
 st.sidebar.write("**Id Dicoding:** MC189D5Y1641")
 
 # Dashboard Title
@@ -33,10 +35,12 @@ st.title("Bike Sharing Analysis ")
 # 1. Peminjaman Sepeda Berdasarkan Musim
 st.header("1. Pola Peminjaman Sepeda Berdasarkan Musim")
 seasonal_trend = day_df.groupby("season_label")["cnt"].mean().sort_values()
-season_colors = {"Winter": "#1E90FF", "Spring": "#00FF7F", "Summer": "#FFD700", "Fall": "#FF4500"}
+season_colors = {"Winter": "#1E90FF", "Spring": "#00FF7F",
+                 "Summer": "#FFD700", "Fall": "#FF4500"}
 
 fig, ax = plt.subplots()
-sns.barplot(x=seasonal_trend.index, y=seasonal_trend.values, palette=[season_colors[s] for s in seasonal_trend.index])
+sns.barplot(x=seasonal_trend.index, y=seasonal_trend.values,
+            palette=[season_colors[s] for s in seasonal_trend.index])
 ax.set_xlabel("Musim")
 ax.set_ylabel("Rata-rata Peminjaman Sepeda")
 ax.set_title("Pola Peminjaman Sepeda Berdasarkan Musim")
@@ -60,7 +64,8 @@ weather_colors = {
 }
 
 fig, ax = plt.subplots()
-sns.barplot(x=weather_impact.index, y=weather_impact.values, palette=[weather_colors[w] for w in weather_impact.index])
+sns.barplot(x=weather_impact.index, y=weather_impact.values, palette=[
+            weather_colors[w] for w in weather_impact.index])
 ax.set_xlabel("Kondisi Cuaca")
 ax.set_ylabel("Rata-rata Peminjaman Sepeda")
 ax.set_title("Pengaruh Cuaca terhadap Peminjaman Sepeda")
@@ -76,16 +81,42 @@ st.write("Dari data ini, terlihat bahwa peminjaman sepeda menurun hampir 75% pad
 
 # 3. Tren Peminjaman Sepeda dari Tahun ke Tahun
 st.header("3. Tren Peminjaman Sepeda dari Tahun ke Tahun")
-fig, ax = plt.subplots(figsize=(10, 5))
-sns.lineplot(x=day_df["dteday"], y=day_df["cnt"], color="b")
-ax.set_xlabel("Tanggal")
-ax.set_ylabel("Jumlah Peminjaman Sepeda")
-ax.set_title("Tren Peminjaman Sepeda Harian (2011-2012)")
-plt.xticks(rotation=45)
-st.pyplot(fig)
+st.subheader("Tren Peminjaman Sepeda (2011-2012)")
 
-st.write("Berdasarkan jumlah total peminjaman:")
-st.write("- Tahun 2011: Sekitar 1.24 juta peminjaman")
-st.write("- Tahun 2012: Sekitar 2.04 juta peminjaman")
-st.write("Dari angka tersebut, terlihat adanya peningkatan sekitar 64% dalam jumlah total peminjaman sepeda dari tahun 2011 ke 2012. Ini menunjukkan bahwa layanan penyewaan sepeda semakin populer seiring waktu. Peningkatan ini bisa disebabkan oleh beberapa faktor, seperti semakin banyaknya pengguna yang beralih ke sepeda sebagai transportasi harian, peningkatan infrastruktur pendukung, atau promosi dari penyedia layanan.")
 
+def plot_monthly_trend():
+    monthly_trend = day_df.groupby(
+        day_df["dteday"].dt.to_period("M"))["cnt"].sum()
+    monthly_trend.index = monthly_trend.index.to_timestamp()
+    monthly_trend = monthly_trend[monthly_trend.index <= "2012-12-01"]
+
+    fig, ax = plt.subplots(figsize=(12, 5))
+    sns.lineplot(x=monthly_trend.index, y=monthly_trend.values,
+                 marker="o", color="b", ax=ax)
+    ax.set_xlabel("Bulan")
+    ax.set_ylabel("Total Peminjaman Sepeda")
+    ax.set_title("Tren Peminjaman Sepeda Per Bulan (2011-2012)")
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    st.pyplot(fig)
+
+
+plot_monthly_trend()
+
+st.subheader("Analisis Tren Peminjaman Sepeda")
+st.write(
+    """
+    **1. Tren Umum Peminjaman Sepeda**  
+    Dari grafik tren peminjaman sepeda per bulan (2011-2012), terlihat bahwa jumlah peminjaman sepeda mengalami pola fluktuatif dengan tren musiman. 
+    Namun, secara keseluruhan, terdapat peningkatan dalam jumlah peminjaman dari tahun 2011 ke tahun 2012.
+    
+    **2. Pola Musiman**  
+    - Peminjaman sepeda cenderung lebih tinggi pada bulan-bulan musim panas dan gugur (sekitar Mei–Oktober), dengan puncak peminjaman terjadi di musim gugur.
+    - Peminjaman sepeda menurun drastis selama musim dingin (Desember–Februari), yang kemungkinan disebabkan oleh suhu yang lebih dingin dan kondisi cuaca yang kurang mendukung.
+
+    **3. Perbandingan Tahun 2011 vs. 2012**  
+    - Pada awal tahun 2011, jumlah peminjaman sepeda relatif lebih rendah dibandingkan dengan awal tahun 2012.
+    - Sepanjang tahun 2012, jumlah peminjaman sepeda secara konsisten lebih tinggi dibandingkan dengan bulan yang sama pada tahun 2011.
+    - Tren peningkatan ini menunjukkan adanya pertumbuhan dalam penggunaan layanan sepeda, yang mungkin disebabkan oleh peningkatan jumlah pengguna, promosi layanan sepeda, atau kebijakan yang lebih mendukung transportasi berbasis sepeda.
+    """
+)
